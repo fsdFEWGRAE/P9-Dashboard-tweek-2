@@ -1,507 +1,618 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>P9 Admin Dashboard</title>
-  <style>
-    * { box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    body { margin: 0; background: radial-gradient(circle at top, #303a7a, #050714 55%, #000000 100%); color: #f5f6ff; }
-    .shell { min-height: 100vh; display: flex; }
-    .sidebar {
-      width: 230px;
-      background: linear-gradient(180deg, rgba(14,18,48,0.96), rgba(3,5,18,0.98));
-      border-right: 1px solid rgba(120,140,255,0.25);
-      padding: 20px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-circle {
-      width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 0 0, #fff3, transparent 55%), linear-gradient(135deg, #5f6dff, #c44bff);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 18px;
-      letter-spacing: 0.05em;
-      box-shadow: 0 0 0 1px #99f4;
-    }
-    .logo-text {
-      font-weight: 700;
-      font-size: 15px;
-    }
-    .logo-sub {
-      font-size: 11px;
-      color: #9aa0dd;
-    }
-    .nav {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      font-size: 13px;
-      color: #cfd2ff;
-    }
-    .nav button {
-      border: none;
-      background: transparent;
-      color: inherit;
-      text-align: left;
-      padding: 7px 8px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .nav button.active {
-      background: linear-gradient(90deg, rgba(96,107,255,0.45), rgba(194,75,255,0.35));
-      color: #fff;
-    }
-    .nav button span.label {
-      margin-left: 6px;
-    }
-    .sidebar-footer {
-      margin-top: auto;
-      font-size: 11px;
-      color: #7d80b0;
-    }
-    .sidebar-footer span {
-      display: block;
-    }
-    .main {
-      flex: 1;
-      padding: 20px 26px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .title-block h1 {
-      margin: 0;
-      font-size: 20px;
-    }
-    .title-block p {
-      margin: 2px 0 0;
-      font-size: 12px;
-      color: #b9bee6;
-    }
-    .admin-tag {
-      font-size: 11px;
-      padding: 5px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(120,140,255,0.6);
-      background: rgba(7,10,35,0.9);
-      color: #d5d8ff;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 2.1fr 1.1fr;
-      gap: 18px;
-      align-items: flex-start;
-    }
-    .card {
-      background: radial-gradient(circle at top left, rgba(115,102,255,0.15), transparent 55%), rgba(5,7,30,0.97);
-      border-radius: 18px;
-      border: 1px solid rgba(153,167,255,0.35);
-      padding: 16px 16px 14px;
-      box-shadow: 0 18px 50px rgba(0,0,0,0.8);
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .card-title {
-      font-size: 14px;
-      font-weight: 600;
-    }
-    .card-sub {
-      font-size: 11px;
-      color: #a0a5d9;
-    }
-    .pill {
-      font-size: 11px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: rgba(18,173,134,0.16);
-      color: #76e9c8;
-      border: 1px solid rgba(146,244,212,0.55);
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 8px;
-      font-size: 12px;
-    }
-    th, td {
-      text-align: left;
-      padding: 6px 4px;
-      border-bottom: 1px solid rgba(37,43,91,0.8);
-    }
-    th {
-      font-size: 11px;
-      color: #9da4de;
-      font-weight: 500;
-    }
-    tr:last-child td {
-      border-bottom: none;
-    }
-    .badge {
-      font-size: 10px;
-      padding: 3px 7px;
-      border-radius: 999px;
-      border: 1px solid rgba(120,140,255,0.5);
-      background: rgba(11,16,40,0.95);
-      color: #cfd3ff;
-    }
-    .badge.red {
-      border-color: rgba(255,119,119,0.6);
-      color: #ffc0c0;
-      background: rgba(35,8,8,0.9);
-    }
-    .badge.green {
-      border-color: rgba(91,237,181,0.7);
-      color: #a9ffe3;
-      background: rgba(12,32,26,0.95);
-    }
-    .actions button {
-      font-size: 11px;
-      border-radius: 999px;
-      border: none;
-      padding: 4px 8px;
-      margin-left: 4px;
-      cursor: pointer;
-      background: rgba(86,97,255,0.35);
-      color: #fff;
-    }
-    .actions button.danger {
-      background: rgba(204,68,98,0.45);
-    }
-    .form-block {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-top: 6px;
-    }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      font-size: 12px;
-    }
-    .field label {
-      color: #cfd3ff;
-    }
-    .field input {
-      background: #050821;
-      border-radius: 10px;
-      border: 1px solid #303872;
-      color: #f5f6ff;
-      padding: 6px 9px;
-      font-size: 12px;
-    }
-    .primary-btn {
-      margin-top: 6px;
-      width: 100%;
-      padding: 7px 0;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(135deg, #5f6dff, #c44bff);
-      color: white;
-      font-weight: 600;
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .muted {
-      font-size: 11px;
-      color: #9da0d0;
-      margin-top: 6px;
-    }
-    .tagline {
-      font-size: 11px;
-      color: #8a8fcd;
-    }
-    .top-metrics {
-      display: flex;
-      gap: 10px;
-      font-size: 11px;
-      color: #acb0e9;
-      margin-top: 8px;
-    }
-    .metric {
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(9,11,40,0.95);
-      border: 1px solid rgba(86,97,255,0.35);
-    }
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      display: inline-block;
-      margin-right: 4px;
-      background: #21e1a5;
-      box-shadow: 0 0 6px #21e1a5;
-    }
-    .error-banner {
-      font-size: 11px;
-      margin-top: 4px;
-      color: #ff9ea8;
-    }
-  </style>
-</head>
-<body>
-<div class="shell">
-  <aside class="sidebar">
-    <div class="logo">
-      <div class="logo-circle">P9</div>
-      <div>
-        <div class="logo-text">P9 Admin</div>
-        <div class="logo-sub">Tweek Access Panel</div>
-      </div>
-    </div>
-    <div class="nav">
-      <button class="active"><span class="label">Users</span></button>
-      <button><span class="label">HWID Control</span></button>
-      <button><span class="label">Security</span></button>
-    </div>
-    <div class="sidebar-footer">
-      <span>© 2025 P9 Technologies</span>
-      <span style="opacity:.75">Private internal dashboard</span>
-    </div>
-  </aside>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <title>P9 Admin Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, #303a7a, #050714 55%, #000);
+        color: #f5f6ff;
+      }
+      .shell {
+        min-height: 100vh;
+        display: flex;
+      }
+      .sidebar {
+        width: 230px;
+        background: linear-gradient(
+          180deg,
+          rgba(14, 18, 48, 0.96),
+          rgba(3, 5, 18, 0.98)
+        );
+        border-right: 1px solid rgba(120, 140, 255, 0.25);
+        padding: 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .brand-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 16px;
+        background: radial-gradient(circle at 30% 20%, #f3e4ff, #9a61ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+      }
+      .brand-text {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .main {
+        flex: 1;
+        padding: 22px 26px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        font-size: 12px;
+        color: #a0a6dd;
+        margin-bottom: 18px;
+      }
+      .panel {
+        background: rgba(7, 8, 26, 0.96);
+        border-radius: 18px;
+        border: 1px solid rgba(120, 140, 255, 0.2);
+        padding: 16px 18px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+      th,
+      td {
+        font-size: 12px;
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(70, 82, 156, 0.4);
+        text-align: left;
+      }
+      th {
+        font-size: 11px;
+        color: #9da4de;
+        font-weight: 500;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .badge {
+        font-size: 10px;
+        padding: 3px 7px;
+        border-radius: 999px;
+        border: 1px solid rgba(120, 140, 255, 0.5);
+        background: rgba(34, 40, 110, 0.8);
+      }
+      .badge.red {
+        border-color: rgba(255, 112, 112, 0.8);
+        background: rgba(110, 32, 32, 0.8);
+      }
+      .badge.green {
+        border-color: rgba(80, 220, 160, 0.9);
+        background: rgba(18, 92, 63, 0.9);
+      }
+      .tag {
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: rgba(34, 36, 88, 0.9);
+        font-size: 10px;
+        color: #c8ccff;
+      }
+      .btn {
+        padding: 5px 8px;
+        border-radius: 8px;
+        border: none;
+        font-size: 11px;
+        cursor: pointer;
+        margin-right: 4px;
+      }
+      .btn-sm {
+        padding: 4px 7px;
+        font-size: 10px;
+      }
+      .btn-danger {
+        background: #ff5562;
+        color: #fff;
+      }
+      .btn-primary {
+        background: #4f7dff;
+        color: #fff;
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid rgba(120, 140, 255, 0.7);
+        color: #cfd3ff;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 2.5fr 1.5fr;
+        gap: 16px;
+        margin-top: 18px;
+      }
+      .field {
+        margin-bottom: 8px;
+      }
+      .label {
+        font-size: 11px;
+        color: #9fa5df;
+        margin-bottom: 4px;
+      }
+      .input,
+      textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(99, 117, 238, 0.6);
+        background: rgba(10, 12, 38, 0.95);
+        padding: 8px 9px;
+        color: #f5f6ff;
+        font-size: 12px;
+      }
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+      .flex {
+        display: flex;
+        align-items: center;
+      }
+      .flex-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .muted {
+        font-size: 11px;
+        color: #969cd8;
+      }
+      .status-text {
+        font-size: 11px;
+        color: #e5e6ff;
+      }
 
-  <main class="main">
-    <div class="topbar">
-      <div class="title-block">
-        <h1>User Management</h1>
-        <p>Manage licenses, HWID binding, and access for P9 Tweek.</p>
-        <div class="top-metrics">
-          <div class="metric"><span class="status-dot"></span><span id="metric-online">API: Pending</span></div>
-          <div class="metric"><span id="metric-users">Users: 0</span></div>
+      /* Login overlay */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at top, #1c2156, #050614 60%, #000);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+      .overlay-card {
+        width: 320px;
+        background: rgba(5, 7, 25, 0.96);
+        border-radius: 18px;
+        border: 1px solid rgba(138, 124, 255, 0.7);
+        padding: 20px 18px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+        text-align: center;
+      }
+      .overlay-title {
+        font-size: 17px;
+        margin-bottom: 8px;
+      }
+      .overlay-sub {
+        font-size: 12px;
+        color: #a3a7e2;
+        margin-bottom: 14px;
+      }
+      .overlay-input {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(138, 124, 255, 0.9);
+        background: rgba(6, 8, 30, 0.98);
+        padding: 9px 10px;
+        color: #f5f6ff;
+        font-size: 13px;
+        margin-bottom: 10px;
+      }
+      .overlay-btn {
+        width: 100%;
+        padding: 9px;
+        border-radius: 10px;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(120deg, #f0c34a, #f9a13c);
+        color: #201107;
+      }
+      .overlay-error {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #ff6678;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="overlay">
+      <div class="overlay-card">
+        <div class="logo" style="
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            margin: 0 auto 10px;
+            background: radial-gradient(circle at 30% 20%, #f3e4ff, #9a61ff);
+            display:flex;align-items:center;justify-content:center;font-weight:800;">
+          P9
         </div>
-      </div>
-      <div class="admin-tag">
-        Admin Console • ENV secured
+        <div class="overlay-title">Admin Login</div>
+        <div class="overlay-sub">
+          أدخل كلمة مرور الأدمن للدخول إلى لوحة التحكم
+        </div>
+        <input
+          id="admin-pass"
+          class="overlay-input"
+          type="password"
+          placeholder="Admin password"
+        />
+        <button id="admin-login-btn" class="overlay-btn">Login</button>
+        <div id="admin-login-error" class="overlay-error"></div>
       </div>
     </div>
 
-    <div class="grid">
-      <section class="card">
-        <div class="card-header">
+    <!-- Main Shell -->
+    <div class="shell">
+      <div class="sidebar">
+        <div class="brand">
+          <div class="brand-logo">P9</div>
           <div>
-            <div class="card-title">Licensed Users</div>
-            <div class="card-sub">Active accounts, HWID status, and controls.</div>
+            <div class="brand-text">P9 Tweek Panel</div>
+            <div style="font-size: 11px; color: #9fa3e3">
+              Admin • HWID Locked
+            </div>
           </div>
-          <button class="pill" onclick="loadUsers()">Refresh list</button>
         </div>
-        <div id="error" class="error-banner"></div>
-        <div style="overflow:auto; max-height:260px;">
-          <table>
+
+        <div class="muted" style="font-size: 11px; margin-top: 10px">
+          Manage licensed users, HWID, and loader access.
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="flex-between">
+          <div>
+            <h1>Licensed Users</h1>
+            <div class="sub">
+              Active accounts, HWID status, and controls.
+            </div>
+          </div>
+          <div class="status-text" id="status-label">Not loaded yet…</div>
+        </div>
+
+        <div class="panel">
+          <table id="users-table">
             <thead>
               <tr>
                 <th>Username</th>
+                <th>Password</th>
                 <th>HWID</th>
                 <th>Status</th>
-                <th style="text-align:right;">Actions</th>
+                <th>Controls</th>
               </tr>
             </thead>
-            <tbody id="users-body">
-              <tr><td colspan="4" style="font-size:11px;color:#999fe0;">No data loaded yet.</td></tr>
-            </tbody>
+            <tbody></tbody>
           </table>
         </div>
-      </section>
 
-      <section class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Add / Control User</div>
-            <div class="card-sub">Create new license or reset an existing one.</div>
+        <div class="grid">
+          <div class="panel">
+            <div class="flex-between" style="margin-bottom: 8px">
+              <div class="muted">Add single user</div>
+            </div>
+
+            <div class="field">
+              <div class="label">Username</div>
+              <input id="single-username" class="input" />
+            </div>
+            <div class="field">
+              <div class="label">Password</div>
+              <input id="single-password" class="input" />
+            </div>
+            <button id="btn-add-single" class="btn btn-primary">
+              Add user
+            </button>
+            <div
+              id="single-result"
+              class="muted"
+              style="margin-top: 6px"
+            ></div>
+          </div>
+
+          <div class="panel">
+            <div class="flex-between" style="margin-bottom: 8px">
+              <div class="muted">Bulk add (username:password per line)</div>
+            </div>
+
+            <textarea
+              id="bulk-input"
+              placeholder="user1:pass1
+user2:pass2
+user3:pass3"
+            ></textarea>
+            <button id="btn-add-bulk" class="btn btn-ghost" style="margin-top: 7px">
+              Add bulk
+            </button>
+            <div
+              id="bulk-result"
+              class="muted"
+              style="margin-top: 6px"
+            ></div>
           </div>
         </div>
-
-        <div class="form-block">
-          <div class="field">
-            <label>Admin Key (x-admin-key)</label>
-            <input id="admin-key" placeholder="Enter your ADMIN_KEY once">
-          </div>
-
-          <div class="field">
-            <label>New Username</label>
-            <input id="new-username" placeholder="e.g. client01">
-          </div>
-          <div class="field">
-            <label>New Password</label>
-            <input id="new-password" placeholder="e.g. hD83ks...">
-          </div>
-          <button class="primary-btn" onclick="addUser()">Add User</button>
-
-          <div class="field" style="margin-top:10px;">
-            <label>Target Username (for HWID / disable)</label>
-            <input id="target-username" placeholder="username to control">
-          </div>
-          <div class="actions" style="margin-top:6px;">
-            <button onclick="resetHwid()">Reset HWID</button>
-            <button class="danger" onclick="disableUser()">Disable</button>
-          </div>
-
-          <div class="muted">
-            All changes are applied instantly to the API.<br>
-            Loader traffic must send a valid <b>x-api-key</b> header.
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
 
-  </main>
-</div>
+    <script>
+      const API_BASE = ""; // نفس الدومين
 
-<script>
-  const apiBase = ""; // Render base URL if you host elsewhere, keep empty for same origin
+      let adminKey = null;
 
-  function getAdminKey() {
-    return document.getElementById("admin-key").value.trim();
-  }
+      const overlay = document.getElementById("login-overlay");
+      const adminPassInput = document.getElementById("admin-pass");
+      const adminLoginBtn = document.getElementById("admin-login-btn");
+      const adminLoginError = document.getElementById("admin-login-error");
 
-  async function api(path, options = {}) {
-    const key = getAdminKey();
-    if (!key) {
-      document.getElementById("error").textContent = "Admin key required.";
-      throw new Error("Missing admin key");
-    }
-    const res = await fetch((apiBase || "") + path, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        "x-admin-key": key,
-        ...(options.headers || {})
+      const usersTableBody = document.querySelector("#users-table tbody");
+      const statusLabel = document.getElementById("status-label");
+
+      const singleUserInput = document.getElementById("single-username");
+      const singlePassInput = document.getElementById("single-password");
+      const singleResult = document.getElementById("single-result");
+      const bulkInput = document.getElementById("bulk-input");
+      const bulkResult = document.getElementById("bulk-result");
+
+      async function adminLogin() {
+        const password = adminPassInput.value.trim();
+        adminLoginError.textContent = "";
+        if (!password) {
+          adminLoginError.textContent = "الرجاء إدخال كلمة المرور.";
+          return;
+        }
+
+        try {
+          const res = await fetch(API_BASE + "/admin/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ password })
+          });
+
+          const data = await res.json();
+          if (!data.ok) {
+            adminLoginError.textContent = "كلمة المرور غير صحيحة.";
+            return;
+          }
+
+          // حفظ المفتاح في الذاكرة واستخدامه في كل الطلبات
+          adminKey = password;
+          overlay.style.display = "none";
+          loadUsers();
+        } catch (e) {
+          adminLoginError.textContent = "خطأ في الاتصال بالسيرفر.";
+        }
       }
-    });
-    if (!res.ok) {
-      document.getElementById("error").textContent = "Request failed: " + res.status;
-      throw new Error("HTTP " + res.status);
-    }
-    document.getElementById("error").textContent = "";
-    return res.json();
-  }
 
-  async function loadUsers() {
-    try {
-      const data = await api("/admin/list");
-      const tbody = document.getElementById("users-body");
-      tbody.innerHTML = "";
-      let count = 0;
-      for (const [username, info] of Object.entries(data)) {
-        count++;
-        const tr = document.createElement("tr");
+      adminLoginBtn.addEventListener("click", adminLogin);
+      adminPassInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") adminLogin();
+      });
 
-        const tdUser = document.createElement("td");
-        tdUser.textContent = username;
-        tr.appendChild(tdUser);
+      async function loadUsers() {
+        if (!adminKey) return;
 
-        const tdHwid = document.createElement("td");
-        tdHwid.textContent = info.hwid || "Not bound";
-        tr.appendChild(tdHwid);
+        statusLabel.textContent = "Loading users…";
 
-        const tdStatus = document.createElement("td");
-        const span = document.createElement("span");
-        span.className = "badge " + (info.disabled ? "red" : "green");
-        span.textContent = info.disabled ? "Disabled" : "Active";
-        tdStatus.appendChild(span);
-        tr.appendChild(tdStatus);
+        try {
+          const res = await fetch(API_BASE + "/admin/users", {
+            headers: {
+              "x-admin-key": adminKey
+            }
+          });
 
-        const tdActions = document.createElement("td");
-        tdActions.style.textAlign = "right";
-        const btnReset = document.createElement("button");
-        btnReset.textContent = "Reset HWID";
-        btnReset.onclick = () => quickReset(username);
-        const btnDisable = document.createElement("button");
-        btnDisable.textContent = info.disabled ? "Enable" : "Disable";
-        btnDisable.className = "danger";
-        btnDisable.onclick = () => quickToggle(username, !!info.disabled);
-        tdActions.appendChild(btnReset);
-        tdActions.appendChild(btnDisable);
-        tdActions.className = "actions";
-        tr.appendChild(tdActions);
+          const data = await res.json();
+          if (!data.ok) {
+            statusLabel.textContent = "Failed to load users.";
+            return;
+          }
 
-        tbody.appendChild(tr);
+          usersTableBody.innerHTML = "";
+          data.users.forEach((u) => {
+            const tr = document.createElement("tr");
+
+            const tdUser = document.createElement("td");
+            tdUser.textContent = u.username;
+            tr.appendChild(tdUser);
+
+            const tdPass = document.createElement("td");
+            tdPass.textContent = u.password;
+            tr.appendChild(tdPass);
+
+            const tdHwid = document.createElement("td");
+            tdHwid.textContent = u.hwid || "Not bound";
+            tr.appendChild(tdHwid);
+
+            const tdStatus = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = "badge " + (u.disabled ? "red" : "green");
+            badge.textContent = u.disabled ? "Disabled" : "Active";
+            tdStatus.appendChild(badge);
+            tr.appendChild(tdStatus);
+
+            const tdActions = document.createElement("td");
+
+            const btnReset = document.createElement("button");
+            btnReset.className = "btn btn-sm btn-ghost";
+            btnReset.textContent = "Reset HWID";
+            btnReset.onclick = () => resetHwid(u.username);
+            tdActions.appendChild(btnReset);
+
+            const btnToggle = document.createElement("button");
+            btnToggle.className = "btn btn-sm btn-primary";
+            btnToggle.textContent = u.disabled ? "Enable" : "Disable";
+            btnToggle.onclick = () => toggleDisable(u.username);
+            tdActions.appendChild(btnToggle);
+
+            const btnDelete = document.createElement("button");
+            btnDelete.className = "btn btn-sm btn-danger";
+            btnDelete.textContent = "Delete";
+            btnDelete.onclick = () => deleteUser(u.username);
+            tdActions.appendChild(btnDelete);
+
+            tr.appendChild(tdActions);
+
+            usersTableBody.appendChild(tr);
+          });
+
+          statusLabel.textContent = `Loaded ${data.users.length} users.`;
+        } catch (e) {
+          statusLabel.textContent = "Error loading users.";
+        }
       }
-      document.getElementById("metric-users").textContent = "Users: " + count;
-      document.getElementById("metric-online").textContent = "API: Online";
-    } catch(e) {
-      document.getElementById("metric-online").textContent = "API: Error";
-    }
-  }
 
-  async function addUser() {
-    const username = document.getElementById("new-username").value.trim();
-    const password = document.getElementById("new-password").value.trim();
-    if (!username || !password) {
-      document.getElementById("error").textContent = "Username & password required.";
-      return;
-    }
-    await api("/admin/addUser", {
-      method: "POST",
-      body: JSON.stringify({ username, password })
-    });
-    document.getElementById("new-username").value = "";
-    document.getElementById("new-password").value = "";
-    loadUsers();
-  }
+      async function addSingleUser() {
+        if (!adminKey) return;
+        singleResult.textContent = "";
 
-  async function resetHwid() {
-    const username = document.getElementById("target-username").value.trim();
-    if (!username) {
-      document.getElementById("error").textContent = "Target username required.";
-      return;
-    }
-    await api("/admin/resetHwid", {
-      method: "POST",
-      body: JSON.stringify({ username })
-    });
-    loadUsers();
-  }
+        const username = singleUserInput.value.trim();
+        const password = singlePassInput.value.trim();
 
-  async function disableUser() {
-    const username = document.getElementById("target-username").value.trim();
-    if (!username) {
-      document.getElementById("error").textContent = "Target username required.";
-      return;
-    }
-    await api("/admin/disableUser", {
-      method: "POST",
-      body: JSON.stringify({ username })
-    });
-    loadUsers();
-  }
+        if (!username || !password) {
+          singleResult.textContent = "أدخل اسم مستخدم وكلمة مرور.";
+          return;
+        }
 
-  async function quickReset(username) {
-    document.getElementById("target-username").value = username;
-    await resetHwid();
-  }
+        try {
+          const res = await fetch(API_BASE + "/admin/addUser", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-admin-key": adminKey
+            },
+            body: JSON.stringify({ username, password })
+          });
 
-  async function quickToggle(username, currentlyDisabled) {
-    document.getElementById("target-username").value = username;
-    await disableUser();
-  }
+          const data = await res.json();
+          if (!data.ok) {
+            if (data.code === "USER_EXISTS") {
+              singleResult.textContent = "هذا المستخدم موجود بالفعل.";
+            } else {
+              singleResult.textContent = "فشل إضافة المستخدم.";
+            }
+            return;
+          }
 
-  // Attempt to auto-load when admin key present
-  setTimeout(() => {
-    const key = getAdminKey();
-    if (key) loadUsers();
-  }, 800);
-</script>
-</body>
+          singleResult.textContent = "تمت إضافة المستخدم.";
+          singleUserInput.value = "";
+          singlePassInput.value = "";
+          loadUsers();
+        } catch (e) {
+          singleResult.textContent = "خطأ في الاتصال.";
+        }
+      }
+
+      async function addBulkUsers() {
+        if (!adminKey) return;
+        bulkResult.textContent = "";
+
+        const bulk = bulkInput.value.trim();
+        if (!bulk) {
+          bulkResult.textContent = "ضع يوزرات في الحقل.";
+          return;
+        }
+
+        try {
+          const res = await fetch(API_BASE + "/admin/addBulk", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-admin-key": adminKey
+            },
+            body: JSON.stringify({ bulk })
+          });
+
+          const data = await res.json();
+          if (!data.ok) {
+            bulkResult.textContent = "فشل إضافة اليوزرات.";
+            return;
+          }
+
+          bulkResult.textContent = `تمت إضافة ${data.added} وتخطي ${data.skipped}.`;
+          bulkInput.value = "";
+          loadUsers();
+        } catch (e) {
+          bulkResult.textContent = "خطأ في الاتصال.";
+        }
+      }
+
+      async function deleteUser(username) {
+        if (!adminKey) return;
+        if (!confirm("Delete user " + username + "?")) return;
+
+        await fetch(API_BASE + "/admin/deleteUser", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({ username })
+        });
+
+        loadUsers();
+      }
+
+      async function resetHwid(username) {
+        if (!adminKey) return;
+        await fetch(API_BASE + "/admin/resetHwid", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({ username })
+        });
+
+        loadUsers();
+      }
+
+      async function toggleDisable(username) {
+        if (!adminKey) return;
+        await fetch(API_BASE + "/admin/toggleDisable", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({ username })
+        });
+
+        loadUsers();
+      }
+
+      document
+        .getElementById("btn-add-single")
+        .addEventListener("click", addSingleUser);
+      document
+        .getElementById("btn-add-bulk")
+        .addEventListener("click", addBulkUsers);
+    </script>
+  </body>
 </html>
