@@ -1,1 +1,7 @@
-{}
+{
+  "Admin": {
+    "password": "123456",
+    "hwid": null,
+    "disabled": false
+  }
+}
