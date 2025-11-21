@@ -1,1 +1,618 @@
-ز
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <title>P9 Admin Dashboard</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+      }
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, #303a7a, #050714 55%, #000);
+        color: #f5f6ff;
+      }
+      .shell {
+        min-height: 100vh;
+        display: flex;
+      }
+      .sidebar {
+        width: 230px;
+        background: linear-gradient(
+          180deg,
+          rgba(14, 18, 48, 0.96),
+          rgba(3, 5, 18, 0.98)
+        );
+        border-right: 1px solid rgba(120, 140, 255, 0.25);
+        padding: 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .brand-logo {
+        width: 34px;
+        height: 34px;
+        border-radius: 16px;
+        background: radial-gradient(circle at 30% 20%, #f3e4ff, #9a61ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+      }
+      .brand-text {
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .main {
+        flex: 1;
+        padding: 22px 26px;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        font-size: 12px;
+        color: #a0a6dd;
+        margin-bottom: 18px;
+      }
+      .panel {
+        background: rgba(7, 8, 26, 0.96);
+        border-radius: 18px;
+        border: 1px solid rgba(120, 140, 255, 0.2);
+        padding: 16px 18px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+      }
+      th,
+      td {
+        font-size: 12px;
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(70, 82, 156, 0.4);
+        text-align: left;
+      }
+      th {
+        font-size: 11px;
+        color: #9da4de;
+        font-weight: 500;
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+      .badge {
+        font-size: 10px;
+        padding: 3px 7px;
+        border-radius: 999px;
+        border: 1px solid rgba(120, 140, 255, 0.5);
+        background: rgba(34, 40, 110, 0.8);
+      }
+      .badge.red {
+        border-color: rgba(255, 112, 112, 0.8);
+        background: rgba(110, 32, 32, 0.8);
+      }
+      .badge.green {
+        border-color: rgba(80, 220, 160, 0.9);
+        background: rgba(18, 92, 63, 0.9);
+      }
+      .tag {
+        padding: 3px 7px;
+        border-radius: 999px;
+        background: rgba(34, 36, 88, 0.9);
+        font-size: 10px;
+        color: #c8ccff;
+      }
+      .btn {
+        padding: 5px 8px;
+        border-radius: 8px;
+        border: none;
+        font-size: 11px;
+        cursor: pointer;
+        margin-right: 4px;
+      }
+      .btn-sm {
+        padding: 4px 7px;
+        font-size: 10px;
+      }
+      .btn-danger {
+        background: #ff5562;
+        color: #fff;
+      }
+      .btn-primary {
+        background: #4f7dff;
+        color: #fff;
+      }
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid rgba(120, 140, 255, 0.7);
+        color: #cfd3ff;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 2.5fr 1.5fr;
+        gap: 16px;
+        margin-top: 18px;
+      }
+      .field {
+        margin-bottom: 8px;
+      }
+      .label {
+        font-size: 11px;
+        color: #9fa5df;
+        margin-bottom: 4px;
+      }
+      .input,
+      textarea {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(99, 117, 238, 0.6);
+        background: rgba(10, 12, 38, 0.95);
+        padding: 8px 9px;
+        color: #f5f6ff;
+        font-size: 12px;
+      }
+      textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+      .flex {
+        display: flex;
+        align-items: center;
+      }
+      .flex-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .muted {
+        font-size: 11px;
+        color: #969cd8;
+      }
+      .status-text {
+        font-size: 11px;
+        color: #e5e6ff;
+      }
+
+      /* Login overlay */
+      .overlay {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(circle at top, #1c2156, #050614 60%, #000);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 50;
+      }
+      .overlay-card {
+        width: 320px;
+        background: rgba(5, 7, 25, 0.96);
+        border-radius: 18px;
+        border: 1px solid rgba(138, 124, 255, 0.7);
+        padding: 20px 18px;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+        text-align: center;
+      }
+      .overlay-title {
+        font-size: 17px;
+        margin-bottom: 8px;
+      }
+      .overlay-sub {
+        font-size: 12px;
+        color: #a3a7e2;
+        margin-bottom: 14px;
+      }
+      .overlay-input {
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(138, 124, 255, 0.9);
+        background: rgba(6, 8, 30, 0.98);
+        padding: 9px 10px;
+        color: #f5f6ff;
+        font-size: 13px;
+        margin-bottom: 10px;
+      }
+      .overlay-btn {
+        width: 100%;
+        padding: 9px;
+        border-radius: 10px;
+        border: none;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        background: linear-gradient(120deg, #f0c34a, #f9a13c);
+        color: #201107;
+      }
+      .overlay-error {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #ff6678;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="overlay">
+      <div class="overlay-card">
+        <div class="logo" style="
+            width: 52px;
+            height: 52px;
+            border-radius: 18px;
+            margin: 0 auto 10px;
+            background: radial-gradient(circle at 30% 20%, #f3e4ff, #9a61ff);
+            display:flex;align-items:center;justify-content:center;font-weight:800;">
+          P9
+        </div>
+        <div class="overlay-title">Admin Login</div>
+        <div class="overlay-sub">
+          أدخل كلمة مرور الأدمن للدخول إلى لوحة التحكم
+        </div>
+        <input
+          id="admin-pass"
+          class="overlay-input"
+          type="password"
+          placeholder="Admin password"
+        />
+        <button id="admin-login-btn" class="overlay-btn">Login</button>
+        <div id="admin-login-error" class="overlay-error"></div>
+      </div>
+    </div>
+
+    <!-- Main Shell -->
+    <div class="shell">
+      <div class="sidebar">
+        <div class="brand">
+          <div class="brand-logo">P9</div>
+          <div>
+            <div class="brand-text">P9 Tweek Panel</div>
+            <div style="font-size: 11px; color: #9fa3e3">
+              Admin • HWID Locked
+            </div>
+          </div>
+        </div>
+
+        <div class="muted" style="font-size: 11px; margin-top: 10px">
+          Manage licensed users, HWID, and loader access.
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="flex-between">
+          <div>
+            <h1>Licensed Users</h1>
+            <div class="sub">
+              Active accounts, HWID status, and controls.
+            </div>
+          </div>
+          <div class="status-text" id="status-label">Not loaded yet…</div>
+        </div>
+
+        <div class="panel">
+          <table id="users-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Password</th>
+                <th>HWID</th>
+                <th>Status</th>
+                <th>Controls</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="grid">
+          <div class="panel">
+            <div class="flex-between" style="margin-bottom: 8px">
+              <div class="muted">Add single user</div>
+            </div>
+
+            <div class="field">
+              <div class="label">Username</div>
+              <input id="single-username" class="input" />
+            </div>
+            <div class="field">
+              <div class="label">Password</div>
+              <input id="single-password" class="input" />
+            </div>
+            <button id="btn-add-single" class="btn btn-primary">
+              Add user
+            </button>
+            <div
+              id="single-result"
+              class="muted"
+              style="margin-top: 6px"
+            ></div>
+          </div>
+
+          <div class="panel">
+            <div class="flex-between" style="margin-bottom: 8px">
+              <div class="muted">Bulk add (username:password per line)</div>
+            </div>
+
+            <textarea
+              id="bulk-input"
+              placeholder="user1:pass1
+user2:pass2
+user3:pass3"
+            ></textarea>
+            <button id="btn-add-bulk" class="btn btn-ghost" style="margin-top: 7px">
+              Add bulk
+            </button>
+            <div
+              id="bulk-result"
+              class="muted"
+              style="margin-top: 6px"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = ""; // نفس الدومين
+
+      let adminKey = null;
+
+      const overlay = document.getElementById("login-overlay");
+      const adminPassInput = document.getElementById("admin-pass");
+      const adminLoginBtn = document.getElementById("admin-login-btn");
+      const adminLoginError = document.getElementById("admin-login-error");
+
+      const usersTableBody = document.querySelector("#users-table tbody");
+      const statusLabel = document.getElementById("status-label");
+
+      const singleUserInput = document.getElementById("single-username");
+      const singlePassInput = document.getElementById("single-password");
+      const singleResult = document.getElementById("single-result");
+      const bulkInput = document.getElementById("bulk-input");
+      const bulkResult = document.getElementById("bulk-result");
+
+      async function adminLogin() {
+        const password = adminPassInput.value.trim();
+        adminLoginError.textContent = "";
+        if (!password) {
+          adminLoginError.textContent = "الرجاء إدخال كلمة المرور.";
+          return;
+        }
+
+        try {
+          const res = await fetch(API_BASE + "/admin/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ password })
+          });
+
+          const data = await res.json();
+          if (!data.ok) {
+            adminLoginError.textContent = "كلمة المرور غير صحيحة.";
+            return;
+          }
+
+          // حفظ المفتاح في الذاكرة واستخدامه في كل الطلبات
+          adminKey = password;
+          overlay.style.display = "none";
+          loadUsers();
+        } catch (e) {
+          adminLoginError.textContent = "خطأ في الاتصال بالسيرفر.";
+        }
+      }
+
+      adminLoginBtn.addEventListener("click", adminLogin);
+      adminPassInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") adminLogin();
+      });
+
+      async function loadUsers() {
+        if (!adminKey) return;
+
+        statusLabel.textContent = "Loading users…";
+
+        try {
+          const res = await fetch(API_BASE + "/admin/users", {
+            headers: {
+              "x-admin-key": adminKey
+            }
+          });
+
+          const data = await res.json();
+          if (!data.ok) {
+            statusLabel.textContent = "Failed to load users.";
+            return;
+          }
+
+          usersTableBody.innerHTML = "";
+          data.users.forEach((u) => {
+            const tr = document.createElement("tr");
+
+            const tdUser = document.createElement("td");
+            tdUser.textContent = u.username;
+            tr.appendChild(tdUser);
+
+            const tdPass = document.createElement("td");
+            tdPass.textContent = u.password;
+            tr.appendChild(tdPass);
+
+            const tdHwid = document.createElement("td");
+            tdHwid.textContent = u.hwid || "Not bound";
+            tr.appendChild(tdHwid);
+
+            const tdStatus = document.createElement("td");
+            const badge = document.createElement("span");
+            badge.className = "badge " + (u.disabled ? "red" : "green");
+            badge.textContent = u.disabled ? "Disabled" : "Active";
+            tdStatus.appendChild(badge);
+            tr.appendChild(tdStatus);
+
+            const tdActions = document.createElement("td");
+
+            const btnReset = document.createElement("button");
+            btnReset.className = "btn btn-sm btn-ghost";
+            btnReset.textContent = "Reset HWID";
+            btnReset.onclick = () => resetHwid(u.username);
+            tdActions.appendChild(btnReset);
+
+            const btnToggle = document.createElement("button");
+            btnToggle.className = "btn btn-sm btn-primary";
+            btnToggle.textContent = u.disabled ? "Enable" : "Disable";
+            btnToggle.onclick = () => toggleDisable(u.username);
+            tdActions.appendChild(btnToggle);
+
+            const btnDelete = document.createElement("button");
+            btnDelete.className = "btn btn-sm btn-danger";
+            btnDelete.textContent = "Delete";
+            btnDelete.onclick = () => deleteUser(u.username);
+            tdActions.appendChild(btnDelete);
+
+            tr.appendChild(tdActions);
+
+            usersTableBody.appendChild(tr);
+          });
+
+          statusLabel.textContent = `Loaded ${data.users.length} users.`;
+        } catch (e) {
+          statusLabel.textContent = "Error loading users.";
+        }
+      }
+
+      async function addSingleUser() {
+        if (!adminKey) return;
+        singleResult.textContent = "";
+
+        const username = singleUserInput.value.trim();
+        const password = singlePassInput.value.trim();
+
+        if (!username || !password) {
+          singleResult.textContent = "أدخل اسم مستخدم وكلمة مرور.";
+          return;
+        }
+
+        try {
+          const res = await fetch(API_BASE + "/admin/addUser", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-admin-key": adminKey
+            },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await res.json();
+          if (!data.ok) {
+            if (data.code === "USER_EXISTS") {
+              singleResult.textContent = "هذا المستخدم موجود بالفعل.";
+            } else {
+              singleResult.textContent = "فشل إضافة المستخدم.";
+            }
+            return;
+          }
+
+          singleResult.textContent = "تمت إضافة المستخدم.";
+          singleUserInput.value = "";
+          singlePassInput.value = "";
+          loadUsers();
+        } catch (e) {
+          singleResult.textContent = "خطأ في الاتصال.";
+        }
+      }
+
+      async function addBulkUsers() {
+        if (!adminKey) return;
+        bulkResult.textContent = "";
+
+        const bulk = bulkInput.value.trim();
+        if (!bulk) {
+          bulkResult.textContent = "ضع يوزرات في الحقل.";
+          return;
+        }
+
+        try {
+          const res = await fetch(API_BASE + "/admin/addBulk", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-admin-key": adminKey
+            },
+            body: JSON.stringify({ bulk })
+          });
+
+          const data = await res.json();
+          if (!data.ok) {
+            bulkResult.textContent = "فشل إضافة اليوزرات.";
+            return;
+          }
+
+          bulkResult.textContent = `تمت إضافة ${data.added} وتخطي ${data.skipped}.`;
+          bulkInput.value = "";
+          loadUsers();
+        } catch (e) {
+          bulkResult.textContent = "خطأ في الاتصال.";
+        }
+      }
+
+      async function deleteUser(username) {
+        if (!adminKey) return;
+        if (!confirm("Delete user " + username + "?")) return;
+
+        await fetch(API_BASE + "/admin/deleteUser", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({ username })
+        });
+
+        loadUsers();
+      }
+
+      async function resetHwid(username) {
+        if (!adminKey) return;
+        await fetch(API_BASE + "/admin/resetHwid", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({ username })
+        });
+
+        loadUsers();
+      }
+
+      async function toggleDisable(username) {
+        if (!adminKey) return;
+        await fetch(API_BASE + "/admin/toggleDisable", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-key": adminKey
+          },
+          body: JSON.stringify({ username })
+        });
+
+        loadUsers();
+      }
+
+      document
+        .getElementById("btn-add-single")
+        .addEventListener("click", addSingleUser);
+      document
+        .getElementById("btn-add-bulk")
+        .addEventListener("click", addBulkUsers);
+    </script>
+  </body>
+</html>
