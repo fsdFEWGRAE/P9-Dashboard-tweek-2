@@ -1,8 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
-const { v4: uuidv4 } = require("uuid");
-
+const { randomUUID } = require("crypto"); // بدل uuidv4
 const app = express();
 
 app.use(express.json());
@@ -31,7 +30,7 @@ function saveUsers(obj) {
   fs.writeFileSync(USERS_FILE, JSON.stringify(obj, null, 2), "utf8");
 }
 
-// تأكد أن الملف موجود
+// تأكد أن users.json موجود
 if (!fs.existsSync(USERS_FILE)) {
   saveUsers({});
 }
@@ -56,7 +55,7 @@ function requireLoader(req, res, next) {
 // ===================== LOADER API =====================
 // POST /api/loader/login
 app.post("/api/loader/login", requireLoader, (req, res) => {
-  const { username, password, hwid, loader_version } = req.body || {};
+  const { username, password, hwid } = req.body || {};
 
   if (!username || !password || !hwid) {
     return res.json({ ok: false, code: "EMPTY_FIELDS" });
@@ -79,7 +78,7 @@ app.post("/api/loader/login", requireLoader, (req, res) => {
 
   // HWID logic
   if (!u.hwid) {
-    // أول مرة → اربط
+    // bind first time
     u.hwid = hwid;
     users[username] = u;
     saveUsers(users);
@@ -88,10 +87,11 @@ app.post("/api/loader/login", requireLoader, (req, res) => {
       code: "BIND_OK",
       status: "Active",
       hwid_status: "Bound",
-      session_token: uuidv4()
+      session_token: randomUUID() // بدل uuidv4
     });
   }
 
+  // mismatch
   if (u.hwid !== hwid) {
     return res.json({
       ok: false,
@@ -101,28 +101,30 @@ app.post("/api/loader/login", requireLoader, (req, res) => {
     });
   }
 
-  // كل شيء تمام
+  // success
   return res.json({
     ok: true,
     code: "OK",
     status: "Active",
     hwid_status: "Bound",
-    session_token: uuidv4()
+    session_token: randomUUID() // بدل uuidv4
   });
 });
 
 // ===================== ADMIN API =====================
 
-// تسجيل دخول الأدمن بباس واحد (ADMIN_KEY)
+// تسجيل دخول الأدمن
 app.post("/admin/login", (req, res) => {
   const { password } = req.body || {};
+
   if (!password || password !== ADMIN_KEY) {
     return res.json({ ok: false, code: "INVALID_ADMIN_PASSWORD" });
   }
+
   return res.json({ ok: true });
 });
 
-// جلب جميع المستخدمين
+// جلب المستخدمين
 app.get("/admin/users", requireAdmin, (req, res) => {
   const users = loadUsers();
   const list = Object.entries(users).map(([username, data]) => ({
@@ -135,9 +137,10 @@ app.get("/admin/users", requireAdmin, (req, res) => {
   res.json({ ok: true, users: list });
 });
 
-// إضافة مستخدم واحد
+// إضافة مستخدم
 app.post("/admin/addUser", requireAdmin, (req, res) => {
   const { username, password } = req.body || {};
+
   if (!username || !password) {
     return res.json({ ok: false, code: "EMPTY_FIELDS" });
   }
@@ -147,19 +150,16 @@ app.post("/admin/addUser", requireAdmin, (req, res) => {
     return res.json({ ok: false, code: "USER_EXISTS" });
   }
 
-  users[username] = {
-    password,
-    hwid: null,
-    disabled: false
-  };
-
+  users[username] = { password, hwid: null, disabled: false };
   saveUsers(users);
+
   res.json({ ok: true });
 });
 
-// إضافة كثير مره وحده (bulk) سطر لكل يوزر: username:password
+// Bulk add (user:pass)
 app.post("/admin/addBulk", requireAdmin, (req, res) => {
   const { bulk } = req.body || {};
+
   if (!bulk || typeof bulk !== "string") {
     return res.json({ ok: false, code: "EMPTY_BULK" });
   }
@@ -173,31 +173,41 @@ app.post("/admin/addBulk", requireAdmin, (req, res) => {
     .map((l) => l.trim())
     .filter(Boolean)
     .forEach((line) => {
-      const sep = line.includes("|") ? "|" : line.includes(":") ? ":" : null;
+      const sep = line.includes("|")
+        ? "|"
+        : line.includes(":")
+        ? ":"
+        : null;
+
       if (!sep) {
         skipped++;
         return;
       }
+
       const [username, password] = line.split(sep).map((s) => s.trim());
       if (!username || !password) {
         skipped++;
         return;
       }
+
       if (users[username]) {
         skipped++;
         return;
       }
+
       users[username] = { password, hwid: null, disabled: false };
       added++;
     });
 
   saveUsers(users);
+
   res.json({ ok: true, added, skipped });
 });
 
 // حذف مستخدم
 app.post("/admin/deleteUser", requireAdmin, (req, res) => {
   const { username } = req.body || {};
+
   if (!username) return res.json({ ok: false, code: "EMPTY_USERNAME" });
 
   const users = loadUsers();
@@ -213,6 +223,7 @@ app.post("/admin/deleteUser", requireAdmin, (req, res) => {
 // Reset HWID
 app.post("/admin/resetHwid", requireAdmin, (req, res) => {
   const { username } = req.body || {};
+
   if (!username) return res.json({ ok: false, code: "EMPTY_USERNAME" });
 
   const users = loadUsers();
@@ -225,21 +236,21 @@ app.post("/admin/resetHwid", requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
-// تعطيل/تفعيل مستخدم
+// Enable/Disable user
 app.post("/admin/toggleDisable", requireAdmin, (req, res) => {
   const { username } = req.body || {};
+
   if (!username) return res.json({ ok: false, code: "EMPTY_USERNAME" });
 
   const users = loadUsers();
-  const u = users[username];
-  if (!u) {
+  if (!users[username]) {
     return res.json({ ok: false, code: "NOT_FOUND" });
   }
 
-  u.disabled = !u.disabled;
-  users[username] = u;
+  users[username].disabled = !users[username].disabled;
   saveUsers(users);
-  res.json({ ok: true, disabled: u.disabled });
+
+  res.json({ ok: true, disabled: users[username].disabled });
 });
 
 // ===================== Start =====================
